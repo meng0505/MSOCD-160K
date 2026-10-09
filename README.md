@@ -100,16 +100,9 @@ DASO-Det combines a dual-branch YOLO11-OBB backbone with:
 
 The supplied lightweight implementation uses `SMDMLiteV2` and full-width `SCIMV2` at **C3, C4, and C5**. SMDM uses mixed dense/depthwise spatial blocks; its residual generator predicts separate SAR and optical corrections from modality features and manifestation diagnostics. State diagnostics control the update through CRCM. SCIM uses a state width equal to the feature width (`state_ratio=1.0`).
 
-Only the four main-component model configurations are included:
+Four main-component configurations are provided: `baseline` (additive fusion), `smdm` (SMDM only), `scim` (SCIM only), and `daso-det` (both modules).
 
-| Configuration | SMDM | SCIM | Params (M) | FLOPs (G) |
-| --- | :---: | :---: | ---: | ---: |
-| `baseline` | — | — | 3.71 | 6.27 |
-| `smdm` | ✓ | — | 7.73 | 14.58 |
-| `scim` | — | ✓ | 4.71 | 8.96 |
-| `daso-det` | ✓ | ✓ | 8.73 | 17.27 |
-
-The baseline uses additive feature fusion. All four configurations use the `n` scale, six classes, and paired 512 × 512 inputs. SMDM defaults to **β = 0.25** and **α = 0.10**. Complexity values are measured on unfused models with FLOPs = 2 × THOP MACs; FFT and functional elementwise operations are not fully counted. These are **architecture checks, not newly reproduced AP or FPS measurements**.
+All four configurations use the `n` scale, six classes, and paired 512 × 512 inputs. SMDM defaults to **β = 0.25** and **α = 0.10**.
 
 ## Setup
 
@@ -176,7 +169,7 @@ python scripts/profile.py --model daso-det --device 0 --timing
 
 Optional timing measures **FP32, batch-1, unfused network forward passes only**, after warm-up; it excludes image loading, preprocessing, NMS, and visualization. It includes the executed FFT operations. Always report GPU, precision, batch size, and timing scope alongside FPS; these numbers are not interchangeable with end-to-end inference speed.
 
-The framework's startup summary may use its default 640-pixel profiling size. Use `scripts/profile.py --imgsz 512` for the 512-pixel complexity values listed above.
+The framework's startup summary may use its default 640-pixel profiling size. Use `scripts/profile.py --imgsz 512` to profile the intended input resolution. FLOPs are reported as 2 × THOP MACs; FFT and functional elementwise operations are not fully counted.
 
 ### Sanity tests
 
