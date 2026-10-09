@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this code or dataset, please cite the accompanying manuscript. Publication details will be updated after acceptance."
+type: software
+title: "MSOCD-160K and DASO-Det"
+authors:
+  - family-names: Meng
+    given-names: Fanlong
+  - family-names: Xue
+    given-names: Fengli
+  - family-names: Li
+    given-names: Kaiwei
+  - family-names: Qi
+    given-names: Xiangyang
+repository-code: "https://github.com/meng0505/MSOCD-160K"
+license: AGPL-3.0
+preferred-citation:
+  type: unpublished
+  title: "Toward Multi-Source SAR–Optical Object-Level Change Detection: A Benchmark Dataset and Unified Framework"
+  authors:
+    - family-names: Meng
+      given-names: Fanlong
+    - family-names: Xue
+      given-names: Fengli
+    - family-names: Li
+      given-names: Kaiwei
+    - family-names: Qi
+      given-names: Xiangyang
