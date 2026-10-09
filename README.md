@@ -36,7 +36,7 @@ MSOCD-160K contains 143 scene pairs and 21,481 paired 512 × 512 tiles. The opti
 
 The split is defined at the **scene-pair level**, so patches from the same source scene do not cross the train/test boundary. 
 
-**Counting convention.** An associated SO-A pair counts as one object–state instance but contributes an OBB annotation in each modality. The current local annotation files contain **167,125 modality-specific OBBs** (87,147 optical and 79,978 SAR), hence the “160K” dataset name. These box counts and the 106,729 object–state instances use different counting units. Run the dataset checker below to audit an available dataset version.
+**Counting convention.** An associated SO-A pair counts as one object–state instance but contributes an OBB annotation in each modality. The current local annotation files contain **167,117 modality-specific OBBs** (87,139 optical and 79,978 SAR), hence the “160K” dataset name. These box counts and the 106,729 object–state instances use different counting units. Run the dataset checker below to audit an available dataset version.
 
 ![Dataset state and object-size statistics](assets/dataset_statistics.png)
 
