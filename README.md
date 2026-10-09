@@ -22,7 +22,7 @@ SO-A corresponds to the unchanged group; S-only and O-only form the changed grou
 
 ![Representative paired airplane and ship samples](assets/dataset_examples.png)
 
-*Representative SO-A, S-only, and O-only samples from the manuscript.*
+
 
 ### Scale and split
 
@@ -34,7 +34,7 @@ MSOCD-160K contains 143 scene pairs and 21,481 paired 512 × 512 tiles. The opti
 | Test | 43 | 6,473 | 32,854 |
 | Total | 143 | 21,481 | 106,729 |
 
-The split is defined at the **scene-pair level**, so patches from the same source scene do not cross the train/test boundary. In the supplied training configuration, `val` and `test` both refer to the test subset; there is no separate validation subset.
+The split is defined at the **scene-pair level**, so patches from the same source scene do not cross the train/test boundary. 
 
 **Counting convention.** An associated SO-A pair counts as one object–state instance but contributes an OBB annotation in each modality. The current local annotation files contain **167,125 modality-specific OBBs** (87,147 optical and 79,978 SAR), hence the “160K” dataset name. These box counts and the 106,729 object–state instances use different counting units. Run the dataset checker below to audit an available dataset version.
 
