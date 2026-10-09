@@ -100,7 +100,7 @@ DASO-Det combines a dual-branch YOLO11-OBB backbone with:
 
 The supplied lightweight implementation uses `SMDMLiteV2` and full-width `SCIMV2` at **C3, C4, and C5**. SMDM uses mixed dense/depthwise spatial blocks; its residual generator predicts separate SAR and optical corrections from modality features and manifestation diagnostics. State diagnostics control the update through CRCM. SCIM uses a state width equal to the feature width (`state_ratio=1.0`).
 
-Four main-component configurations are provided: `baseline` (additive fusion), `smdm` (SMDM only), `scim` (SCIM only), and `daso-det` (both modules).
+Four main-component configurations are provided: `baseline`, `smdm` (SMDM only), `scim` (SCIM only), and `daso-det` (both modules).
 
 All four configurations use the `n` scale, six classes, and paired 512 × 512 inputs. SMDM defaults to **β = 0.25** and **α = 0.10**.
 
