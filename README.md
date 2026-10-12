@@ -171,17 +171,6 @@ Optional timing measures **FP32, batch-1, unfused network forward passes only**,
 
 The framework's startup summary may use its default 640-pixel profiling size. Use `scripts/profile.py --imgsz 512` to profile the intended input resolution. FLOPs are reported as 2 × THOP MACs; FFT and functional elementwise operations are not fully counted.
 
-### Sanity tests
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-These small tests check frequency-mask symmetry, fusion outputs/gradients, all four model forwards, and parameter counts. They do not constitute full-dataset accuracy reproduction.
-
-## Repository scope
-
-This curated release retains the detector runtime, DASO modules, paired data handling, four model configurations, and runnable entry points. Unrelated custom comparison methods, legacy DASO variants, training outputs, development artifacts, and manuscript files are excluded.
 
 ## Citation
 
