@@ -98,7 +98,6 @@ DASO-Det combines a dual-branch YOLO11-OBB backbone with:
 - **SMDM** — frequency-domain state/manifestation diagnostics and gated residual calibration.
 - **SCIM** — shared ordered interaction, common–directional decomposition, and state-conditioned routing.
 
-The supplied lightweight implementation uses `SMDMLiteV2` and full-width `SCIMV2` at **C3, C4, and C5**. SMDM uses mixed dense/depthwise spatial blocks; its residual generator predicts separate SAR and optical corrections from modality features and manifestation diagnostics. State diagnostics control the update through CRCM. SCIM uses a state width equal to the feature width (`state_ratio=1.0`).
 
 Four main-component configurations are provided: `baseline`, `smdm` (SMDM only), `scim` (SCIM only), and `daso-det` (both modules).
 
