@@ -1,180 +1,138 @@
 # MSOCD-160K & DASO-Det
 
-**Multi-Source SAR–Optical Object-Level Change Detection Dataset**
+**Multi-Source SAR–Optical Object-Level Change Detection**
 
-Code and dataset information for **Toward Multi-Source SAR–Optical Object-Level Change Detection: A Benchmark Dataset and Unified Framework**.
+Official implementation and dataset information for *Multi-Source SAR–Optical Object-Level Change Detection: A Benchmark Dataset and Unified Framework*.
 
-Fanlong Meng, Fengli Xue, Kaiwei Li, and Xiangyang Qi.
+**Authors:** Fanlong Meng, Fengli Xue, Kaiwei Li, and Xiangyang Qi.
 
-MSOCD-160K supports joint oriented object localization and cross-observation state recognition from asynchronous SAR–optical image pairs. Unlike shared-label multimodal detection, it explicitly distinguishes associated objects from objects observed in only one modality.
+## Overview
+
+MSOCD-160K supports oriented object detection and cross-observation change recognition from asynchronous SAR–optical image pairs. The benchmark includes two object categories (airplane and ship) and three change labels:
+
+| Label | Definition |
+| --- | --- |
+| **SO-A** | Spatially associated objects in both observations (Unchanged) |
+| **S-only** | Objects observed only in SAR (Changed) |
+| **O-only** | Objects observed only in optical imagery (Changed) |
+
+The detection task uses **six joint classes** (two object categories × three change labels).
+
+![Representative samples](assets/dataset_examples.png)
 
 ## Dataset
 
-The benchmark covers airports and harbors, with two object categories (airplane and ship) and three cross-observation states:
+MSOCD-160K contains **143 scene pairs**, **21,481 paired 512 × 512 image patches**, and **167,117 OBB annotations** across the SAR and optical modalities. Optical sources include GF-2, GF-7, Jilin-1, and Google Earth; SAR sources include GF-3, Umbra, ICEYE, and Capella.
 
-| State | Meaning |
-| --- | --- |
-| **SO-A** | SAR–Optical Associated: associated instances in both observations |
-| **S-only** | An unmatched instance observed only in SAR |
-| **O-only** | An unmatched instance observed only in optical imagery |
+| Split | Scene pairs | Paired patches |
+| --- | ---: | ---: |
+| Train | 100 | 15,008 |
+| Test | 43 | 6,473 |
+| **Total** | **143** | **21,481** |
 
-SO-A corresponds to the unchanged group; S-only and O-only form the changed group. The detector uses six category–state labels: two object categories × three states.
+The split is performed at the scene-pair level. The 167,117 count refers to modality-specific OBB annotations.
 
-![Representative paired airplane and ship samples](assets/dataset_examples.png)
-
-
-
-### Scale and split
-
-MSOCD-160K contains 143 scene pairs and 21,481 paired 512 × 512 tiles. The optical sources include GF-2, GF-7, Jilin-1, and Google Earth; the SAR sources include GF-3, Umbra, ICEYE, and Capella. The manuscript reports image resolutions of 0.2–1 m.
-
-| Split | Scene pairs | Paired tiles | Object–state instances |
-| --- | ---: | ---: | ---: |
-| Train | 100 | 15,008 | 73,875 |
-| Test | 43 | 6,473 | 32,854 |
-| Total | 143 | 21,481 | 106,729 |
-
-The split is defined at the **scene-pair level**, so patches from the same source scene do not cross the train/test boundary. 
-
-**Counting convention.** An associated SO-A pair counts as one object–state instance but contributes an OBB annotation in each modality. The current local annotation files contain **167,117 modality-specific OBBs** (87,139 optical and 79,978 SAR). These box counts and the 106,729 object–state instances use different counting units. 
-
-![Dataset state and object-size statistics](assets/dataset_statistics.png)
-
-*State distribution, category-wise state counts, and relative object-size distribution from the manuscript.*
-
-<details>
-<summary>Dataset construction pipeline</summary>
-
-![Dataset construction pipeline](assets/dataset_pipeline.png)
-
-Collection → scene registration → independent OBB annotation → cross-modal association and state labeling → paired patch generation.
-
-</details>
+![Dataset statistics](assets/dataset_statistics.png)
 
 ### Availability
 
-**The full dataset will be made public after the paper is accepted.** This repository currently provides the model implementation, main-component configurations, dataset format, and run instructions; it does not contain the raw imagery or trained checkpoints. Dataset and checkpoint download links will be added here when released.
+The **full dataset and pretrained checkpoints will be released after paper acceptance**. The repository currently provides the implementation, dataset format, and run scripts.
 
-### Directory layout and labels
+### Data format
 
 ```text
 MSOCD-160K/
-├── images/                 # Optical images
+├── images/
 │   ├── train/
 │   └── test/
-├── imagesSAR/              # Paired SAR images; identical relative filenames
+├── imagesSAR/
 │   ├── train/
 │   └── test/
-├── labels/                 # Joint six-class, object-state OBB labels for training
-│   ├── train/
-│   └── test/
-├── labelsOpt/              # Per-modality OBB annotations, if supplied
-├── labelsSAR/              # Per-modality OBB annotations, if supplied
-└── manifests/              # Dataset construction/split metadata, if supplied
+└── labels/
+    ├── train/
+    └── test/
 ```
 
-For example, `images/train/example.png` must pair with `imagesSAR/train/example.png` and `labels/train/example.txt`. Each joint label line uses the YOLO-OBB format:
+Optical images, SAR images, and label files share corresponding relative filenames. Each label follows the YOLO-OBB format:
 
 ```text
 class_id x1 y1 x2 y2 x3 y3 x4 y4
 ```
 
-The four ordered polygon corners are normalized to [0, 1]. Class IDs are fixed:
+Coordinates are normalized to `[0, 1]`. Class IDs are:
 
-| ID | Label | ID | Label |
+| ID | Class | ID | Class |
 | ---: | --- | ---: | --- |
 | 0 | `plane_SO-A` | 3 | `ship_SO-A` |
 | 1 | `plane_S-only` | 4 | `ship_S-only` |
 | 2 | `plane_O-only` | 5 | `ship_O-only` |
 
-The network input contains six channels in **[Optical RGB, SAR RGB]** order. A grayscale SAR image is read as three channels. Input pairs must have matching dimensions; do not replace missing SAR images with optical images.
+The network input consists of **optical RGB and SAR three-channel images** (six channels in total). Grayscale SAR imagery is read as three channels.
 
-## DASO-Det
+## Method
 
-![DASO-Det framework from the manuscript](assets/daso_overview.png)
+DASO-Det is built on a dual-branch YOLO11-OBB backbone with two components:
 
-DASO-Det combines a dual-branch YOLO11-OBB backbone with:
+- **SMDM:** Complementary frequency-domain diagnostics and gated residual feature calibration.
+- **SCIM:** Shared and directional feature modeling with state-conditioned interaction.
 
-- **SMDM** — frequency-domain state/manifestation diagnostics and gated residual calibration.
-- **SCIM** — shared ordered interaction, common–directional decomposition, and state-conditioned routing.
+![DASO-Det architecture](assets/daso_overview.png)
 
+Four configurations are provided: `baseline`, `smdm`, `scim`, and `daso-det`. All use six detection classes and 512 × 512 paired inputs. The default SMDM parameters are **β = 0.25** and **α = 0.10**.
 
-Four main-component configurations are provided: `baseline`, `smdm` (SMDM only), `scim` (SCIM only), and `daso-det` (both modules).
+## Installation
 
-All four configurations use the `n` scale, six classes, and paired 512 × 512 inputs. SMDM defaults to **β = 0.25** and **α = 0.10**.
-
-## Setup
-
-Python 3.8+ is supported; a dedicated environment is recommended. Install a compatible PyTorch/torchvision pair for your CUDA environment first, then install this repository:
+Install a compatible PyTorch/torchvision build for your CUDA environment, then run:
 
 ```bash
 git clone https://github.com/meng0505/MSOCD-160K.git
 cd MSOCD-160K
-python -m venv .venv
-# Linux/macOS: source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
-The release was smoke-tested with Python 3.8.18, PyTorch 1.13.1+cu117, torchvision 0.14.1+cu117, and an RTX 4090. For strict deterministic training, the runtime recommends PyTorch 2.0 or newer.
+The repository includes a modified Ultralytics runtime required for paired SAR–optical inputs and DASO-Det modules.
 
-This repository vendors the modified Ultralytics runtime. **Do not replace it with a stock `pip install ultralytics` package**: the paired data loader and DASO modules are required. Check the loaded location with:
+## Usage
 
-```bash
-python -c "import ultralytics; print(ultralytics.__file__)"
-```
-
-### 1. Check the dataset
+**Check the dataset**
 
 ```bash
 python scripts/check_dataset.py --data-root /path/to/MSOCD-160K --check-image-sizes
 ```
 
-The checker scans all train/test pairs, checks OBB labels and class IDs, and reports counts. The optional image-size check verifies matching 512 × 512 pairs. On Windows, quote the dataset path, for example `--data-root "E:/datasets/MSOCD-160K"`.
-
-### 2. Train
+**Train**
 
 ```bash
 python scripts/train.py --data-root /path/to/MSOCD-160K --model daso-det --device 0
 ```
 
-Defaults: input 512 × 512, batch 32, 200 epochs, SGD, initial learning rate 0.01, seed 0. Training starts from scratch unless `--weights` supplies a compatible checkpoint for the same dual-branch architecture; a stock single-branch YOLO checkpoint is not a drop-in initialization. Use `--model baseline`, `--model smdm`, or `--model scim` for the main-component ablations. Run `python scripts/train.py --help` for batch, worker, AMP, and run-name options. On Windows, use `--workers 0` if multiprocessing causes issues.
+Default settings: 512 × 512 inputs, batch size 32, 200 epochs, SGD, initial learning rate 0.01, and seed 0. Replace `daso-det` with `baseline`, `smdm`, or `scim` for ablation configurations. Checkpoints are saved under `runs/train/<model>/weights/`.
 
-The script creates a machine-local dataset YAML under `runs/data/` and saves checkpoints to `runs/train/<model>/weights/`. Lower the batch size if GPU memory is insufficient.
-
-### 3. Evaluate
+**Evaluate**
 
 ```bash
 python scripts/val.py --data-root /path/to/MSOCD-160K --weights runs/train/daso-det/weights/best.pt --split test --device 0
 ```
 
-Validation reports OBB detection metrics, including AP50 and AP50–95 (AP). Use the same dataset version, split, and evaluation settings for comparisons. Training and evaluation commands require dataset access; evaluation also requires a trained checkpoint.
-
-### 4. Predict paired images
+**Predict**
 
 ```bash
 python scripts/predict.py --weights runs/train/daso-det/weights/best.pt --source /path/to/MSOCD-160K/images/test --device 0
 ```
 
-The script finds SAR counterparts automatically and saves the predictions over both optical and SAR images under `runs/predict/`. One optical file can also be supplied as `--source`.
-
-### 5. Profile complexity and speed
+**Profile model complexity and speed**
 
 ```bash
 python scripts/profile.py --model all --imgsz 512
 python scripts/profile.py --model daso-det --device 0 --timing
 ```
 
-Optional timing measures **FP32, batch-1, unfused network forward passes only**, after warm-up; it excludes image loading, preprocessing, NMS, and visualization. It includes the executed FFT operations. Always report GPU, precision, batch size, and timing scope alongside FPS; these numbers are not interchangeable with end-to-end inference speed.
-
-The framework's startup summary may use its default 640-pixel profiling size. Use `scripts/profile.py --imgsz 512` to profile the intended input resolution. FLOPs are reported as 2 × THOP MACs; FFT and functional elementwise operations are not fully counted.
-
+FPS measures batch-1, FP32 network forward passes. FLOPs are estimated as twice the profiled THOP MACs; FFT and some element-wise operations are not fully counted in this estimate.
 
 ## Citation
 
-If you use MSOCD-160K or DASO-Det, please cite the accompanying manuscript. Publication details and the final BibTeX entry will be added after acceptance; see [CITATION.cff](CITATION.cff) for the current manuscript metadata.
+Please cite the accompanying manuscript if you use MSOCD-160K or DASO-Det. The final citation will be added after publication; current metadata is provided in [CITATION.cff](CITATION.cff).
 
-## Acknowledgements and license
+## License
 
-The runtime builds on [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) and [YOLOFuse](https://github.com/meng0505/YOLOFuse-main-change). Original attribution and the [AGPL-3.0 license](LICENSE) are retained. The code license does not itself grant redistribution rights to third-party source imagery; dataset-use terms will accompany the dataset release.
+The implementation retains the [AGPL-3.0 license](LICENSE) and builds on [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) and [YOLOFuse](https://github.com/meng0505/YOLOFuse-main-change). Source imagery remains subject to its respective data-use terms.
