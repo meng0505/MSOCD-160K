@@ -4,7 +4,6 @@
 
 Official implementation and dataset information for *Multi-Source SAR–Optical Object-Level Change Detection: A Benchmark Dataset and Unified Framework*.
 
-**Authors:** Fanlong Meng, Fengli Xue, Kaiwei Li, and Xiangyang Qi.
 
 ## Overview
 
